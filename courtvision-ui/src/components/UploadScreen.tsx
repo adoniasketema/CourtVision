@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { UploadCloud, CheckCircle2, Loader2, Video, AlertCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://20.69.120.68:8000';
 
 const PROCESSING_MESSAGES = [
     "Uploading game video...",
