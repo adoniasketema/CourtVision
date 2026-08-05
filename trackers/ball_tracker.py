@@ -27,15 +27,17 @@ class BallTracker:
     # ------------------------------------------------------------------
 
     def detect_frames(self, frames):
+        from utils.hw_utils import get_optimal_device_and_precision, get_inference_batch_size
         detections = []
         device, use_half = get_optimal_device_and_precision()
-        batch_size = 32
+        batch_size = get_inference_batch_size(device)
         for i in range(0, len(frames), batch_size):
             batch = frames[i : i + batch_size]
             print(f"Processing ball detections for frames {i} to {min(i + batch_size, len(frames))} on [{device.upper()}]...")
             batch_dets = self.model.predict(
                 batch,
                 conf=0.3,
+                imgsz=640,
                 verbose=False,
                 device=device,
                 half=use_half,

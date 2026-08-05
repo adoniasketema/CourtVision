@@ -18,3 +18,16 @@ def get_optimal_device_and_precision():
         return "mps", False
     else:
         return "cpu", False
+
+
+def get_inference_batch_size(device: str) -> int:
+    """
+    Calculate the optimal batch size depending on hardware architecture to prevent
+    CPU RAM cache thrashing while maximizing GPU tensor pipeline saturation.
+    """
+    if device == "cuda":
+        return 32  # Saturate NVIDIA CUDA VRAM pipelines
+    elif device == "mps":
+        return 16  # Optimal for unified Apple Silicon architecture
+    else:
+        return 8   # Prevent CPU memory swap thrashing on non-GPU instances

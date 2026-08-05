@@ -19,8 +19,9 @@ class CourtKeypointDetector:
             elif video_path:
                 print(f"  Court keypoint stub is stale or missing — regenerating for {video_path}")
 
+        from utils.hw_utils import get_optimal_device_and_precision, get_inference_batch_size
         device, use_half = get_optimal_device_and_precision()
-        batch_size = 32
+        batch_size = get_inference_batch_size(device)
         court_keypoints = []
         for i in range(0, len(frames), batch_size):
             batch_frames = frames[i:i+batch_size]
@@ -28,6 +29,7 @@ class CourtKeypointDetector:
             detections_batch = self.model.predict(
                 batch_frames,
                 conf=0.5,
+                imgsz=640,
                 verbose=False,
                 device=device,
                 half=use_half,

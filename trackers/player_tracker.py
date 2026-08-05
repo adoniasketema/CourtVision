@@ -17,8 +17,9 @@ class PlayerTracker:
         if max_frames is not None:
             frames = frames[:max_frames]
 
+        from utils.hw_utils import get_optimal_device_and_precision, get_inference_batch_size
         device, use_half = get_optimal_device_and_precision()
-        batch_size = 32
+        batch_size = get_inference_batch_size(device)
         detections = []
         for i in range(0, len(frames), batch_size):
             batch_frames = frames[i : i + batch_size]
@@ -26,6 +27,7 @@ class PlayerTracker:
             batch_detections = self.model.predict(
                 batch_frames,
                 conf=0.5,
+                imgsz=640,
                 verbose=False,
                 device=device,
                 half=use_half,
