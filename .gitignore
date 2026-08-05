@@ -1,0 +1,39 @@
+# Environments and compilation
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Frontend and packages
+node_modules/
+dist/
+build/
+.env
+
+# System and editor files
+.DS_Store
+.ipynb_checkpoints/
+.vscode/
+.github/
+.gemini/
+brain/
+scratch/
+Prompts/
+
+# Data and large files (Model weights, video inputs/outputs)
+data/
+input_videos/
+output_videos/
+stubs/
+exploration/
+runs/
+images/
+training_notebooks/
+*.mp4
+*.avi
+*.mov
+*.pt
+*.onnx
+*.engine

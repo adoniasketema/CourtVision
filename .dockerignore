@@ -1,0 +1,29 @@
+# Ignore Python compilation and virtual environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore local system files
+.DS_Store
+.git/
+.gitignore
+.gemini/
+brain/
+scratch/
+
+# Ignore local video input/output caches and processing stubs
+input_videos/
+output_videos/
+stubs/
+*.mp4
+*.avi
+*.mov
+
+# Ignore React frontend web application (deployed independently to Azure Static Web Apps)
+courtvision-ui/
+node_modules/
+build/
+dist/
