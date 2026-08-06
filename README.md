@@ -27,6 +27,8 @@ A sports video analytics suite that transforms broadcast basketball footage into
 
 ## Installation
 
+> **Hardware Recommendation:** Due to the intensive nature of running multiple YOLOv8 models concurrently, executing this pipeline on a dedicated GPU (NVIDIA CUDA or Apple Silicon MPS) is strongly recommended for reasonable processing times.
+
 ### 1. Repository Setup
 
 Git Large File Storage (LFS) is required for PyTorch model weights.
