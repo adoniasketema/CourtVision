@@ -154,12 +154,18 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     ball_control_pairs = list(zip(player_ball_control, team_ball_control))
     pass_stats = pass_detector.detect(ball_control_pairs)
 
-    # ── 12. Annotation loop ───────────────────────────────────────────────────
+    # ── 12. Annotation loop (In-Place RAM Optimization) ───────────────────────
     print("Annotating frames...")
-    output_frames = []
+    import gc
+    import torch
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    gc.collect()
 
-    for frame_num, frame in enumerate(video_frames):
-        frame = frame.copy()
+    output_frames = video_frames
+
+    for frame_num in range(len(output_frames)):
+        frame = output_frames[frame_num]
         players = player_tracks[frame_num]
         ball_entry = ball_tracks[frame_num]
 
@@ -179,8 +185,7 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
                 frame = draw_triangle(frame, ball_bbox, BALL_COLOR)
 
         frame = draw_team_ball_control(frame, frame_num, team_ball_control_np)
-
-        output_frames.append(frame)
+        output_frames[frame_num] = frame
 
     # ── 13. Speed badges on game frames ──────────────────────────────────────
     print("Drawing speed badges...")
