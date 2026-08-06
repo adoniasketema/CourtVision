@@ -10,11 +10,11 @@ def _crop_torso(frame, bbox):
     x1, y1, x2, y2 = map(int, bbox)
     h = y2 - y1
     w = x2 - x1
-    # Take vertical middle 50% (torso) and horizontal center 60% to reduce background noise from edges
-    torso_y1 = y1 + int(0.25 * h)
-    torso_y2 = y1 + int(0.75 * h)
-    torso_x1 = x1 + int(0.20 * w)
-    torso_x2 = x2 - int(0.20 * w)
+    # Tighter crop: vertical 20% to 50% (chest area), horizontal center 40%
+    torso_y1 = y1 + int(0.20 * h)
+    torso_y2 = y1 + int(0.50 * h)
+    torso_x1 = x1 + int(0.30 * w)
+    torso_x2 = x2 - int(0.30 * w)
     if torso_x2 <= torso_x1:
         torso_x1, torso_x2 = x1, x2
     return frame[torso_y1:torso_y2, torso_x1:torso_x2]
@@ -27,12 +27,19 @@ def _jersey_feature(img):
     if hsv.size < 30:
         return None
 
-    # Compute normalized histograms across H, S, and V channels without discarding low-saturation pixels.
-    # This ensures accurate clustering for white jerseys (low S, high V), dark jerseys (low V),
-    # and saturated colors (specific H and high S).
-    h_hist = cv2.calcHist([hsv], [0], None, [24], [0, 180])
-    s_hist = cv2.calcHist([hsv], [1], None, [16], [0, 256])
-    v_hist = cv2.calcHist([hsv], [2], None, [16], [0, 256])
+    # Mask out background wood/court colors and dark shadows
+    lower_wood = np.array([5, 40, 50])
+    upper_wood = np.array([25, 255, 255])
+    wood_mask = cv2.inRange(hsv, lower_wood, upper_wood)
+    dark_mask = cv2.inRange(hsv, np.array([0, 0, 0]), np.array([180, 255, 40]))
+    
+    ignore_mask = cv2.bitwise_or(wood_mask, dark_mask)
+    valid_mask = cv2.bitwise_not(ignore_mask)
+
+    # Compute normalized histograms
+    h_hist = cv2.calcHist([hsv], [0], valid_mask, [24], [0, 180])
+    s_hist = cv2.calcHist([hsv], [1], valid_mask, [16], [0, 256])
+    v_hist = cv2.calcHist([hsv], [2], valid_mask, [16], [0, 256])
 
     cv2.normalize(h_hist, h_hist)
     cv2.normalize(s_hist, s_hist)

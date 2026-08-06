@@ -23,6 +23,7 @@ Copy and paste this code block into your first Colab code cell and hit **Play / 
 %cd CourtVision
 
 # 2. Install PyTorch GPU requirements and Cloud Tunnel packages
+!apt-get install -y tesseract-ocr
 !pip install -q -r requirements.txt
 !pip install -q pyngrok uvicorn
 

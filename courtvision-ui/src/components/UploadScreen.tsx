@@ -69,6 +69,17 @@ export function UploadScreen() {
                     clearInterval(pollIntervalRef.current!);
                     setOutputVideoUrl(`${cleanBase}/video/${job.output_filename}`);
                     setApiStats(job.stats);
+                    
+                    if (job.stats && job.stats.players) {
+                        const mappedPlayers = Object.entries(job.stats.players).map(([id, data]: [string, any]) => ({
+                            id,
+                            name: `Player #${id}`,
+                            teamId: data.team,
+                            stats: { distanceFt: data.distance_ft }
+                        }));
+                        useStore.getState().setPlayers(mappedPlayers);
+                    }
+
                     setUploadStatus('done');
                     setTimeout(() => setProcessingComplete(true), 400);
                 } else if (job.status === 'error') {

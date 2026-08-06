@@ -14,6 +14,7 @@ from tactical_view_convert import TacticalViewConvert
 import supervision as sv
 from drawings import TacticalViewDrawer, SpeedDistanceDrawer, CourtKeypointDrawer
 from team_assigner.team_assigner import TeamAssigner
+from scoreboard_ocr.scoreboard_ocr import ScoreboardOCR
 
 # ── Constants ────────────────────────────────────────────────────────────────
 TEAM_1_COLOR = (0, 0, 255)    # red   (BGR)
@@ -169,7 +170,12 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     del pass_detector
     gc.collect()
 
-    # ── 12. Annotation loop (In-Place RAM Optimization) ───────────────────────
+    # ── 12. Scoreboard OCR & Scoring Events ──────────────────────────────────
+    print("Reading broadcast scoreboard...")
+    ocr_reader = ScoreboardOCR(sample_rate_frames=24)
+    ocr_results = ocr_reader.process_video(video_frames)
+
+    # ── 13. Annotation loop (In-Place RAM Optimization) ───────────────────────
     print("Annotating frames & sweeping system memory...")
     import torch
     if torch.cuda.is_available():
@@ -263,6 +269,8 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
             }
             for pid, dist in sorted(final_distances.items())
         },
+        "scoreboard": ocr_results.get("scoreboard", {}),
+        "scoring_events": ocr_results.get("events", [])
     }
 
     return stats

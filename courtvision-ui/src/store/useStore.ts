@@ -42,7 +42,9 @@ interface StoreState {
 
     // Data state
     events: GameEvent[]
+    setEvents: (events: GameEvent[]) => void
     players: Player[]
+    setPlayers: (players: Player[]) => void
     playerStats: PlayerStats[]
 
     // Selection state
@@ -72,7 +74,9 @@ export const useStore = create<StoreState>((set) => ({
     setApiStats: (stats) => set({ apiStats: stats }),
 
     events: [] as GameEvent[],
+    setEvents: (events) => set({ events }),
     players: [] as Player[],
+    setPlayers: (players) => set({ players }),
     playerStats: [] as PlayerStats[],
 
     selectedPlayerId: null,
