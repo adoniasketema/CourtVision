@@ -2,7 +2,6 @@
 
 A sports video analytics suite that transforms broadcast basketball footage into tactical insights using YOLOv8, ByteTrack, and spatial homography.
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100.0-green.svg)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18.0-blue.svg)](https://reactjs.org/)
@@ -136,6 +135,8 @@ A three-stage possession attribution pipeline manages motion blur and player occ
 ### Unsupervised Team Classification
 Bounding box vertical profiles are sliced between 25% and 75% height boundaries to isolate player torsos. RGB images are converted to HSV color space, low-saturation shadow masks are stripped, and a normalized 24-bin histogram is computed. These embeddings are fed into a Scikit-Learn KMeans algorithm to classify tracker IDs into distinct teams and referees.
 
-## License
+## Copyright
 
-MIT License
+&copy; 2026 Adonias Ketema. All Rights Reserved.
+
+This repository and its source code are provided for portfolio demonstration purposes only. No license is granted to use, modify, or distribute this software.
