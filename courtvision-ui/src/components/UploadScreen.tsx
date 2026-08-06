@@ -59,7 +59,9 @@ export function UploadScreen() {
 
         pollIntervalRef.current = setInterval(async () => {
             try {
-                const res = await fetch(`${cleanBase}/job/${jobId}`);
+                const res = await fetch(`${cleanBase}/job/${jobId}`, {
+                    headers: { 'ngrok-skip-browser-warning': '69420' }
+                });
                 if (!res.ok) throw new Error('Server error');
                 const job = await res.json();
 
@@ -94,7 +96,11 @@ export function UploadScreen() {
         const cleanBase = apiBase.replace(/\/+$/, '').replace(/\/docs$/, '');
 
         try {
-            const res = await fetch(`${cleanBase}/upload`, { method: 'POST', body: formData });
+            const res = await fetch(`${cleanBase}/upload`, { 
+                method: 'POST', 
+                body: formData,
+                headers: { 'ngrok-skip-browser-warning': '69420' }
+            });
             if (!res.ok) {
                 const err = await res.json();
                 throw new Error(err.detail || 'Upload failed');
