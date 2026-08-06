@@ -107,18 +107,21 @@ def run_pipeline(input_path: str, output_path: str, tactical_output_path: str = 
     gc.collect()
 
     for frame_num in range(num_frames):
-        kp = court_keypoints[frame_num]
-        if len(kp) > 0:
-            pts = np.array(kp, np.int32)
-            hull = cv2.convexHull(pts)
-            filtered_players = {}
-            for pid, p_data in player_tracks[frame_num].items():
-                x1, y1, x2, y2 = p_data["bbox"]
-                center_bottom = (int((x1 + x2) / 2), int(y2))
-                # >= -50 means we allow 50 pixels outside the line to account for tracker noise
-                if cv2.pointPolygonTest(hull, center_bottom, True) >= -100:
-                    filtered_players[pid] = p_data
-            player_tracks[frame_num] = filtered_players
+        kp_result = court_keypoints[frame_num]
+        if kp_result.keypoints is not None:
+            raw_kps = kp_result.keypoints.xy.tolist()[0]
+            valid_kps = [kp for kp in raw_kps if kp[0] > 0 and kp[1] > 0]
+            if len(valid_kps) >= 3:
+                pts = np.array(valid_kps, np.int32)
+                hull = cv2.convexHull(pts)
+                filtered_players = {}
+                for pid, p_data in player_tracks[frame_num].items():
+                    x1, y1, x2, y2 = p_data["bbox"]
+                    center_bottom = (int((x1 + x2) / 2), int(y2))
+                    # >= -50 means we allow 50 pixels outside the line to account for tracker noise
+                    if cv2.pointPolygonTest(hull, center_bottom, True) >= -100:
+                        filtered_players[pid] = p_data
+                player_tracks[frame_num] = filtered_players
 
     # ── 5 & 6. Team assignment ────────────────────────────────────────────────
     print("Assigning player teams...")
