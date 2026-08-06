@@ -86,44 +86,50 @@ Navigate to `http://localhost:5173` to access the application interface.
 
 ```mermaid
 flowchart TD
-    subgraph Input ["Video Ingestion"]
-        A[Raw Input Video Feed] --> B[OpenCV Frame Extraction]
-    end
+    %% Input Layer
+    A[Raw Input Video Feed] --> B[OpenCV Frame Extraction]
 
-    subgraph Inference ["Deep Learning & Tracking"]
-        B --> C[YOLOv8 Player Tracker]
-        B --> D[YOLOv8 Ball Tracker]
-        B --> E[YOLOv8 Court Detector]
-        
-        C --> F[ByteTrack Multi-Target Tracker]
-        D --> G[ByteTrack Ball Tracker]
-        G --> H[Pandas Kinematic Interpolation]
-    end
+    %% Deep Learning & Tracking
+    B --> C[YOLOv8 Player Tracker]
+    B --> D[YOLOv8 Ball Tracker]
+    B --> E[YOLOv8 Court Detector]
+    
+    C --> F[ByteTrack Multi-Target Tracker]
+    D --> G[ByteTrack Ball Tracker]
+    G --> H[Pandas Kinematic Interpolation]
 
-    subgraph Analytics ["Feature Engineering & Transformations"]
-        F --> I[HSV Histogram Torso Extraction]
-        I --> J[KMeans Team Clustering]
-        
-        F --> K[Player-Ball Proximity]
-        H --> K
-        K --> L[Pass & Interception State Machine]
-        
-        E --> M[OpenCV Homography]
-        M --> N[2D Birds-Eye Tactical Mapping]
-        F --> N
-        N --> O[Kinematic Movement Engine]
-    end
+    %% Feature Engineering & Transformations
+    F --> I[HSV Histogram Torso Extraction]
+    I --> J[KMeans Team Clustering]
+    
+    F --> K[Player-Ball Proximity]
+    H --> K
+    K --> L[Pass & Interception State Machine]
+    
+    E --> M[OpenCV Homography]
+    M --> N[2D Birds-Eye Tactical Mapping]
+    F --> N
+    N --> O[Kinematic Movement Engine]
 
-    subgraph Output ["Rendering & Application Delivery"]
-        J --> P[OpenCV Graphic Compositor]
-        L --> P
-        O --> P
-        P --> Q[Annotated Video Buffer]
-        
-        Q --> R[Standalone File Export]
-        Q --> S[FastAPI Transcoding Engine]
-        S --> T[React Web Client Interface]
-    end
+    %% Rendering & Application Delivery
+    J --> P[OpenCV Graphic Compositor]
+    L --> P
+    O --> P
+    P --> Q[Annotated Video Buffer]
+    
+    Q --> R[Standalone File Export]
+    Q --> S[FastAPI Transcoding Engine]
+    S --> T[React Web Client Interface]
+
+    classDef input fill:#1E293B,stroke:#38BDF8,color:#F8FAFC,stroke-width:2px;
+    classDef inference fill:#0F172A,stroke:#A855F7,color:#F8FAFC,stroke-width:2px;
+    classDef analytics fill:#111827,stroke:#10B981,color:#F8FAFC,stroke-width:2px;
+    classDef output fill:#171923,stroke:#F59E0B,color:#F8FAFC,stroke-width:2px;
+    
+    class A,B input;
+    class C,D,E,F,G,H inference;
+    class I,J,K,L,M,N,O analytics;
+    class P,Q,R,S,T output;
 ```
 
 ## Advanced Algorithms
