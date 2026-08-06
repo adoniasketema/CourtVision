@@ -46,7 +46,10 @@ In a new code cell in Colab, copy and paste the following Python server executio
 import os
 from pyngrok import ngrok
 
-# 1. Enter your Free Ngrok Authtoken
+# 1. Clean up any lingering cloud tunnels from previous cell restarts
+ngrok.kill()
+
+# 2. Enter your Free Ngrok Authtoken
 NGROK_AUTH_TOKEN = "YOUR_NGROK_AUTH_TOKEN_HERE"
 ngrok.set_auth_token(NGROK_AUTH_TOKEN)
 
