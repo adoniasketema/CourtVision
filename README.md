@@ -10,6 +10,19 @@
 
 Designed for scalability and modular integration, CourtVision operates both as a **standalone CLI computational engine** for batched video processing and as a **reactive full-stack web service** powered by a high-performance **FastAPI** backend and an interactive **Vite / React** client interface.
 
+![Dashboard Preview](assets/dashboard_preview.png)
+*(Note: Upload your UI screenshot to the `assets/` folder and name it `dashboard_preview.png`)*
+
+---
+
+## 🚧 Work in Progress & Current Enhancements
+
+While the core pipeline is fully functional, I am actively refining the downstream Python logic to achieve 100% precision:
+* **Player Tracking & Roster:** Enhancing bounding-box tracking accuracy and out-of-bounds geometric polygon filtering (`cv2.pointPolygonTest`) to ensure the team roster UI binds cleanly without including the bench/crowd.
+* **Score Tracking:** Honing the `pytesseract` OCR robustness to handle scoreboard graphic overlays across different broadcast networks and detect Scoring Events via polling.
+* **Team Assignment (K-Means):** Continuing to refine HSV color space masking to dynamically ignore court reflections, warm wood tones, and dark shadows for flawless jersey clustering.
+* **Tactical Minimap Extraction:** Rendering the birds-eye homography tactical view into a standalone H.264 video feed for the frontend UI.
+
 ---
 
 ## 🛠️ Core Technical Stack & Capabilities

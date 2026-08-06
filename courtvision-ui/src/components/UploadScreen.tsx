@@ -99,6 +99,39 @@ export function UploadScreen() {
         }, 3000);
     }, [setUploadStatus, setUploadError, setOutputVideoUrl, setApiStats, setProcessingComplete, apiBase]);
 
+    const handleDemoMode = () => {
+        const dummyStats = {
+            team_1: { ball_acquisition_pct: 54.2, passes: 8, interceptions: 2 },
+            team_2: { ball_acquisition_pct: 45.8, passes: 6, interceptions: 1 },
+            players: {
+                "4": { team: 1, distance_ft: 450.2 },
+                "12": { team: 1, distance_ft: 380.1 },
+                "14": { team: 1, distance_ft: 200.1 },
+                "9": { team: 2, distance_ft: 410.5 },
+                "1": { team: 2, distance_ft: 390.8 }
+            },
+            scoreboard: { team_1_name: "TEXAS TECH", team_2_name: "DUKE", score_1: 21, score_2: 21 },
+            scoring_events: []
+        };
+        
+        setApiStats(dummyStats);
+        
+        const mappedPlayers = Object.entries(dummyStats.players).map(([id, data]: [string, any]) => ({
+            id,
+            name: `Player #${id}`,
+            teamId: data.team,
+            stats: { distanceFt: data.distance_ft }
+        }));
+        useStore.getState().setPlayers(mappedPlayers);
+        
+        // Null URLs so video player just handles it gracefully
+        setOutputVideoUrl(null);
+        setTacticalVideoUrl(null);
+
+        setUploadStatus('done');
+        setTimeout(() => setProcessingComplete(true), 400);
+    };
+
     const handleUpload = async () => {
         if (!selectedFile) return;
 
@@ -218,6 +251,13 @@ export function UploadScreen() {
                                 className="w-full py-4 rounded-xl bg-brand hover:bg-brand-light text-white font-semibold transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Start Processing
+                            </button>
+                            
+                            <button
+                                onClick={handleDemoMode}
+                                className="w-full py-3 mt-2 rounded-xl border border-charcoal-600 hover:bg-charcoal-700 text-gray-300 font-semibold transition-all shadow-lg active:scale-[0.98]"
+                            >
+                                View Demo Dashboard
                             </button>
                         </div>
                     ) : (
