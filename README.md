@@ -6,8 +6,7 @@ A sports video analytics suite that transforms broadcast basketball footage into
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100.0-green.svg)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18.0-blue.svg)](https://reactjs.org/)
 
-![Dashboard Preview](assets/dashboard_preview.png)
-*(Note: Upload UI screenshot to assets/dashboard_preview.png)*
+![Dashboard Preview](assets/court_images/dashboard_preview.png)
 
 ## Features
 
@@ -87,40 +86,43 @@ Navigate to `http://localhost:5173` to access the application interface.
 
 ```mermaid
 flowchart TD
-    subgraph Input_Layer ["Video & Asset Ingestion"]
-        A[Raw Input Video Feed] --> B["OpenCV Frame Extraction"]
-        LFS["Git LFS Model Weights Check"] --> C
+    subgraph Input ["Video Ingestion"]
+        A[Raw Input Video Feed] --> B[OpenCV Frame Extraction]
     end
 
-    subgraph Neural_Inference_Layer ["Deep Learning Inference & Tracking"]
-        B --> C["YOLOv8 Player & Referee Tracker"]
-        B --> D["YOLOv8 Basketball Trajectory Tracker"]
-        B --> E["YOLOv8 Court Keypoint Detector"]
+    subgraph Inference ["Deep Learning & Tracking"]
+        B --> C[YOLOv8 Player Tracker]
+        B --> D[YOLOv8 Ball Tracker]
+        B --> E[YOLOv8 Court Detector]
         
-        C --> F["ByteTrack Multi-Target Tracker"]
-        D --> G["ByteTrack Ball Track Association"]
-        G --> H["Pandas Kinematic Hole Interpolation"]
+        C --> F[ByteTrack Multi-Target Tracker]
+        D --> G[ByteTrack Ball Tracker]
+        G --> H[Pandas Kinematic Interpolation]
     end
 
-    subgraph Analytics_Transformation_Layer ["Feature Engineering & Spatial Transformations"]
-        F --> I["HSV Histogram Torso Extraction"]
-        I --> J["KMeans Clustering"]
+    subgraph Analytics ["Feature Engineering & Transformations"]
+        F --> I[HSV Histogram Torso Extraction]
+        I --> J[KMeans Team Clustering]
         
-        F & H --> K["Player-Ball Proximity Optimization"]
-        K --> L["Pass & Interception State Machine"]
+        F --> K[Player-Ball Proximity]
+        H --> K
+        K --> L[Pass & Interception State Machine]
         
-        E --> M["OpenCV Perspective Homography Transformation"]
-        F & M --> N["2D Birds-Eye Tactical Court Mapping"]
-        N --> O["Kinematic Movement Engine"]
+        E --> M[OpenCV Homography]
+        M --> N[2D Birds-Eye Tactical Mapping]
+        F --> N
+        N --> O[Kinematic Movement Engine]
     end
 
-    subgraph Output_Presentation_Layer ["Rendering & Application Delivery"]
-        J & K & L & N & O --> P["OpenCV Graphic Compositor"]
-        P --> Q["Annotated Video Buffer"]
+    subgraph Output ["Rendering & Application Delivery"]
+        J --> P[OpenCV Graphic Compositor]
+        L --> P
+        O --> P
+        P --> Q[Annotated Video Buffer]
         
-        Q --> R["Standalone File Export"]
-        Q --> S["FastAPI Transcoding Engine"]
-        S --> T["React Web Client Interface"]
+        Q --> R[Standalone File Export]
+        Q --> S[FastAPI Transcoding Engine]
+        S --> T[React Web Client Interface]
     end
 ```
 
