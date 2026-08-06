@@ -44,25 +44,21 @@ In a new code cell in Colab, copy and paste the following Python server executio
 
 ```python
 import os
-import subprocess
-import time
 from pyngrok import ngrok
 
-# 1. Enter your Free Ngrok Authtoken (Get one instantly for free at https://dashboard.ngrok.com/signup)
+# 1. Enter your Free Ngrok Authtoken
 NGROK_AUTH_TOKEN = "YOUR_NGROK_AUTH_TOKEN_HERE"
 ngrok.set_auth_token(NGROK_AUTH_TOKEN)
 
-# 2. Launch FastAPI Uvicorn Server in background on NVIDIA GPU
-print("Starting CourtVision Uvicorn Server...")
-subprocess.Popen(["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"])
-time.sleep(4)
-
-# 3. Create public encrypted high-speed tunnel
+# 2. Create public cloud tunnel FIRST
 public_url = ngrok.connect(8000).public_url
 print(
     f"\n🎉 YOUR NVIDIA GPU COURT VISION API IS LIVE AT: {public_url}"
 )
-print(f"👉 Test API Swagger Docs: {public_url}/docs")
+print("👉 Paste this URL into your dashboard! Starting interactive server logs below...\n")
+
+# 3. Launch FastAPI Uvicorn Server directly in foreground to view real-time logs!
+!uvicorn api:app --host 0.0.0.0 --port 8000 --workers 1
 ```
 
 ---
