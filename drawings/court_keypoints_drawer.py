@@ -13,14 +13,11 @@ class CourtKeypointDrawer:
             text_thickness=1
         )
 
-        output_frames = []
-        for index, frame in enumerate(frames):
-            if index >= len(court_keypoints):
-                break
-            annotated_frame = frame.copy()
+        for index in range(min(len(frames), len(court_keypoints))):
             keypoints = court_keypoints[index]
-            annotated_frame = vertex_annotator.annotate(scene=annotated_frame, key_points=keypoints)
-            annotated_frame = vertex_label_annotator.annotate(scene=annotated_frame, key_points=keypoints)
-            output_frames.append(annotated_frame)
+            frame = frames[index]
+            frame = vertex_annotator.annotate(scene=frame, key_points=keypoints)
+            frame = vertex_label_annotator.annotate(scene=frame, key_points=keypoints)
+            frames[index] = frame
 
-        return output_frames
+        return frames

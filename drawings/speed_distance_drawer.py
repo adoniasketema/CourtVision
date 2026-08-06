@@ -98,12 +98,10 @@ class SpeedDistanceDrawer:
         Returns:
             List of frames with speed badges drawn.
         """
-        output = []
-        for frame_idx, frame in enumerate(frames):
-            frame = frame.copy()
+        for frame_idx in range(len(frames)):
+            frame = frames[frame_idx]
 
             if frame_idx >= len(per_frame_speeds) or frame_idx >= len(player_tracks):
-                output.append(frame)
                 continue
 
             frame_speeds = per_frame_speeds[frame_idx]
@@ -155,8 +153,8 @@ class SpeedDistanceDrawer:
                     1,
                 )
 
-            output.append(frame)
-        return output
+            frames[frame_idx] = frame
+        return frames
 
     # ── Distance sidebar ──────────────────────────────────────────────────────
 
@@ -177,8 +175,8 @@ class SpeedDistanceDrawer:
         team1_players = sorted(pid for pid, t in player_teams.items() if t == 1)
         team2_players = sorted(pid for pid, t in player_teams.items() if t == 2)
 
-        output = []
-        for frame_idx, frame in enumerate(frames):
+        for frame_idx in range(len(frames)):
+            frame = frames[frame_idx]
             h, w = frame.shape[:2]
             sidebar = np.full((h, SIDEBAR_WIDTH, 3), (28, 28, 28), dtype=np.uint8)
 
@@ -238,7 +236,6 @@ class SpeedDistanceDrawer:
             draw_team_section(team1_players, 1)
             draw_team_section(team2_players, 2)
 
-            combined = np.hstack([frame, sidebar])
-            output.append(combined)
+            frames[frame_idx] = np.hstack([frame, sidebar])
 
-        return output
+        return frames
