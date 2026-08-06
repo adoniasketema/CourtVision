@@ -37,6 +37,8 @@ interface StoreState {
     // API results
     outputVideoUrl: string | null
     setOutputVideoUrl: (url: string | null) => void
+    tacticalVideoUrl: string | null
+    setTacticalVideoUrl: (url: string | null) => void
     apiStats: ApiStats | null
     setApiStats: (stats: ApiStats | null) => void
 
@@ -70,6 +72,8 @@ export const useStore = create<StoreState>((set) => ({
 
     outputVideoUrl: null,
     setOutputVideoUrl: (url) => set({ outputVideoUrl: url }),
+    tacticalVideoUrl: null,
+    setTacticalVideoUrl: (url) => set({ tacticalVideoUrl: url }),
     apiStats: null,
     setApiStats: (stats) => set({ apiStats: stats }),
 

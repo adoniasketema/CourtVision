@@ -35,6 +35,7 @@ export function UploadScreen() {
     const setUploadStatus = useStore(state => state.setUploadStatus);
     const setUploadError = useStore(state => state.setUploadError);
     const setOutputVideoUrl = useStore(state => state.setOutputVideoUrl);
+    const setTacticalVideoUrl = useStore(state => state.setTacticalVideoUrl);
     const setApiStats = useStore(state => state.setApiStats);
     const setProcessingComplete = useStore(state => state.setProcessingComplete);
 
@@ -68,6 +69,9 @@ export function UploadScreen() {
                 if (job.status === 'done') {
                     clearInterval(pollIntervalRef.current!);
                     setOutputVideoUrl(`${cleanBase}/video/${job.output_filename}`);
+                    if (job.tactical_filename) {
+                        setTacticalVideoUrl(`${cleanBase}/video/${job.tactical_filename}`);
+                    }
                     setApiStats(job.stats);
                     
                     if (job.stats && job.stats.players) {

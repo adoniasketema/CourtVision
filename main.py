@@ -32,7 +32,7 @@ os.makedirs("stubs", exist_ok=True)
 os.makedirs("output_videos", exist_ok=True)
 
 
-def run_pipeline(input_path: str, output_path: str) -> dict:
+def run_pipeline(input_path: str, output_path: str, tactical_output_path: str = None) -> dict:
     """Run the full analysis pipeline on a video and return stats.
 
     Args:
@@ -93,6 +93,33 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     player_tracks = player_tracks[:num_frames]
     ball_tracks   = ball_tracks[:num_frames]
 
+    # ── 4.5. Court keypoint detection & Out-of-bounds filtering ───────────────
+    print("Detecting court keypoints and filtering out-of-bounds players...")
+    court_stub = f"stubs/{base_name}_court_keypoints.pkl"
+    court_keypoint_detector = CourtKeypointDetector(COURT_KEYPOINT_MODEL)
+    court_keypoints = court_keypoint_detector.detect_keypoints(
+        video_frames,
+        read_from_stub=True,
+        stub_path=court_stub,
+    )
+    court_keypoints = court_keypoints[:num_frames]
+    del court_keypoint_detector
+    gc.collect()
+
+    for frame_num in range(num_frames):
+        kp = court_keypoints[frame_num]
+        if len(kp) > 0:
+            pts = np.array(kp, np.int32)
+            hull = cv2.convexHull(pts)
+            filtered_players = {}
+            for pid, p_data in player_tracks[frame_num].items():
+                x1, y1, x2, y2 = p_data["bbox"]
+                center_bottom = (int((x1 + x2) / 2), int(y2))
+                # >= -50 means we allow 50 pixels outside the line to account for tracker noise
+                if cv2.pointPolygonTest(hull, center_bottom, True) >= -100:
+                    filtered_players[pid] = p_data
+            player_tracks[frame_num] = filtered_players
+
     # ── 5 & 6. Team assignment ────────────────────────────────────────────────
     print("Assigning player teams...")
     team_assigner = TeamAssigner()
@@ -126,18 +153,7 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     del player_ball_assigner
     gc.collect()
 
-    # ── 8. Court keypoint detection ───────────────────────────────────────────
-    print("Detecting court keypoints...")
-    court_stub = f"stubs/{base_name}_court_keypoints.pkl"
-    court_keypoint_detector = CourtKeypointDetector(COURT_KEYPOINT_MODEL)
-    court_keypoints = court_keypoint_detector.detect_keypoints(
-        video_frames,
-        read_from_stub=True,
-        stub_path=court_stub,
-    )
-    court_keypoints = court_keypoints[:num_frames]
-    del court_keypoint_detector
-    gc.collect()
+
 
     # ── 9. Tactical view transformation ──────────────────────────────────────
     print("Transforming to tactical view...")
@@ -164,7 +180,7 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
 
     # ── 11. Pass / interception detection ────────────────────────────────────
     print("Detecting passes and interceptions...")
-    pass_detector = PassDetector(min_possession_frames=2)
+    pass_detector = PassDetector(min_possession_frames=15)
     ball_control_pairs = list(zip(player_ball_control, team_ball_control))
     pass_stats = pass_detector.detect(ball_control_pairs)
     del pass_detector
@@ -216,7 +232,7 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     # ── 14. Tactical minimap (bottom strip) ───────────────────────────────────
     print("Drawing tactical minimap...")
     tactical_drawer = TacticalViewDrawer()
-    output_frames = tactical_drawer.draw(
+    tactical_frames = tactical_drawer.draw(
         video_frames=output_frames,
         court_image_path=COURT_IMAGE_PATH,
         width=tactical_converter.width,
@@ -228,10 +244,10 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     )
 
     # ── 15. Court keypoint overlay ────────────────────────────────────────────
-    print("Drawing court keypoints...")
-    sv_keypoints = [sv.KeyPoints.from_ultralytics(kp) for kp in validated_keypoints]
-    court_keypoint_drawer = CourtKeypointDrawer()
-    output_frames = court_keypoint_drawer.draw_keypoints(output_frames, sv_keypoints)
+    # print("Drawing court keypoints...")
+    # sv_keypoints = [sv.KeyPoints.from_ultralytics(kp) for kp in validated_keypoints]
+    # court_keypoint_drawer = CourtKeypointDrawer()
+    # output_frames = court_keypoint_drawer.draw_keypoints(output_frames, sv_keypoints)
 
     # ── 17. Distance sidebar (right panel) ────────────────────────────────────
     print("Drawing distance sidebar...")
@@ -242,6 +258,10 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     # ── 18. Save video ────────────────────────────────────────────────────────
     print(f"Saving output to {output_path}...")
     save_video(output_frames, output_path)
+
+    if tactical_output_path and tactical_frames:
+        print(f"Saving tactical view to {tactical_output_path}...")
+        save_video(tactical_frames, tactical_output_path)
 
     # ── 17. Stats ─────────────────────────────────────────────────────────────
     team_1_frames = int(np.sum(team_ball_control_np == 1))
@@ -269,7 +289,12 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
             }
             for pid, dist in sorted(final_distances.items())
         },
-        "scoreboard": ocr_results.get("scoreboard", {}),
+        "scoreboard": {
+            "team_1_name": ocr_results.get("team_1_name", "Team 1"),
+            "team_2_name": ocr_results.get("team_2_name", "Team 2"),
+            "score_1": ocr_results.get("score_1", 0),
+            "score_2": ocr_results.get("score_2", 0),
+        },
         "scoring_events": ocr_results.get("events", [])
     }
 

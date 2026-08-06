@@ -35,6 +35,8 @@ async def upload_video(file: UploadFile = File(...)):
     input_path = os.path.join("input_videos", safe_name)
     output_filename = f"{job_id}_output.mp4"
     output_path = os.path.join("output_videos", output_filename)
+    tactical_filename = f"{job_id}_tactical.mp4"
+    tactical_path = os.path.join("output_videos", tactical_filename)
 
     content = await file.read()
     with open(input_path, "wb") as f:
@@ -58,14 +60,20 @@ async def upload_video(file: UploadFile = File(...)):
     def _run():
         try:
             from main import run_pipeline
-            stats = run_pipeline(input_path, output_path)
+            stats = run_pipeline(input_path, output_path, tactical_output_path=tactical_path)
             tmp_path = output_path + ".h264.mp4"
             if _transcode_h264(output_path, tmp_path):
                 os.replace(tmp_path, output_path)
+                
+            tmp_tactical = tactical_path + ".h264.mp4"
+            if os.path.exists(tactical_path) and _transcode_h264(tactical_path, tmp_tactical):
+                os.replace(tmp_tactical, tactical_path)
+
             _jobs[job_id] = {
                 "status": "done",
                 "stats": stats,
                 "output_filename": output_filename,
+                "tactical_filename": tactical_filename,
             }
         except Exception as exc:
             _jobs[job_id] = {"status": "error", "error": str(exc)}

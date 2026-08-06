@@ -38,6 +38,7 @@ class TacticalViewDrawer:
         if court_image is None:
             raise FileNotFoundError(f"Court image not found: {court_image_path}")
         court_image = cv2.resize(court_image, (width, height))
+        tactical_frames = []
 
         for index in range(len(video_frames)):
             frame = video_frames[index]
@@ -87,10 +88,10 @@ class TacticalViewDrawer:
                     if player_with_ball is not None and player_id == player_with_ball:
                         cv2.circle(panel, (draw_x, draw_y), 11, BALL_HIGHLIGHT_COLOR, 2)
 
-            # ── Stack: game frame on top, minimap panel on bottom ────────────────
-            video_frames[index] = np.vstack([frame, panel])
+            # ── Return just the minimap panel instead of vstacking ────────────────
+            tactical_frames.append(panel)
             if index % 50 == 0:
                 import gc; gc.collect()
 
         import gc; gc.collect()
-        return video_frames
+        return tactical_frames

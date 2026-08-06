@@ -5,6 +5,7 @@ import { Activity, Users } from 'lucide-react';
 
 export function VideoTab() {
     const apiStats = useStore((state) => state.apiStats);
+    const tacticalVideoUrl = useStore((state) => state.tacticalVideoUrl);
     const players = apiStats?.players || {};
     const playerIds = Object.keys(players);
 
@@ -29,6 +30,21 @@ export function VideoTab() {
                 <div className="bg-charcoal-800 border border-charcoal-700 rounded-2xl overflow-hidden shadow-2xl relative aspect-video flex-shrink-0">
                     <VideoPlayer />
                 </div>
+
+                {tacticalVideoUrl && (
+                    <div className="mt-6 bg-charcoal-800 border border-charcoal-700 rounded-2xl overflow-hidden shadow-2xl relative flex-shrink-0 p-4">
+                        <div className="flex items-center justify-between mb-4 border-b border-charcoal-700 pb-2">
+                            <h3 className="font-bold text-lg tracking-tight">Tactical Bird's-Eye Minimap</h3>
+                        </div>
+                        <video 
+                            src={tacticalVideoUrl}
+                            controls
+                            className="w-full h-auto rounded-xl border border-charcoal-700"
+                            muted
+                            loop
+                        />
+                    </div>
+                )}
 
                 {/* Kinematic Exertion Leaderboard */}
                 <div className="mt-6 flex-1 bg-charcoal-800 border border-charcoal-700 rounded-2xl p-6 shadow-xl flex flex-col">
