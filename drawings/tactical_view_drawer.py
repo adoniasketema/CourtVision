@@ -89,5 +89,8 @@ class TacticalViewDrawer:
 
             # ── Stack: game frame on top, minimap panel on bottom ────────────────
             video_frames[index] = np.vstack([frame, panel])
+            if index % 50 == 0:
+                import gc; gc.collect()
 
+        import gc; gc.collect()
         return video_frames

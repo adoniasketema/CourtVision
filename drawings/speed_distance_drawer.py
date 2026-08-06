@@ -237,5 +237,8 @@ class SpeedDistanceDrawer:
             draw_team_section(team2_players, 2)
 
             frames[frame_idx] = np.hstack([frame, sidebar])
+            if frame_idx % 50 == 0:
+                import gc; gc.collect()
 
+        import gc; gc.collect()
         return frames

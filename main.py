@@ -64,6 +64,8 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
         stub_path=player_stub,
         video_path=input_path,
     )
+    del player_tracker
+    import gc; gc.collect()
 
     # ── 3. Ball tracking ──────────────────────────────────────────────────────
     print("Running ball tracker...")
@@ -78,6 +80,8 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     # ── 4. Ball interpolation ─────────────────────────────────────────────────
     print("Interpolating ball positions...")
     ball_tracks = ball_tracker.interpolate_ball_positions(ball_tracks)
+    del ball_tracker
+    gc.collect()
 
     # Guard: stubs from a different video may have a different frame count.
     num_frames = min(len(video_frames), len(player_tracks), len(ball_tracks))
@@ -93,6 +97,8 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     team_assigner = TeamAssigner()
     team_assigner.assign_team_color(video_frames, player_tracks)
     player_teams = team_assigner.track_to_team
+    del team_assigner
+    gc.collect()
 
     # ── 7. Ball possession per frame ──────────────────────────────────────────
     print("Computing ball possession...")
@@ -116,6 +122,8 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
             team_ball_control.append(0)
 
     team_ball_control_np = np.array(team_ball_control)
+    del player_ball_assigner
+    gc.collect()
 
     # ── 8. Court keypoint detection ───────────────────────────────────────────
     print("Detecting court keypoints...")
@@ -127,11 +135,16 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
         stub_path=court_stub,
     )
     court_keypoints = court_keypoints[:num_frames]
+    del court_keypoint_detector
+    gc.collect()
 
     # ── 9. Tactical view transformation ──────────────────────────────────────
     print("Transforming to tactical view...")
     tactical_converter = TacticalViewConvert(COURT_IMAGE_PATH)
     validated_keypoints = tactical_converter.validate_keypoints(court_keypoints)
+    del court_keypoints
+    gc.collect()
+
     tactical_player_positions = tactical_converter.transform_to_tactical(
         validated_keypoints, player_tracks
     )
@@ -153,10 +166,11 @@ def run_pipeline(input_path: str, output_path: str) -> dict:
     pass_detector = PassDetector(min_possession_frames=2)
     ball_control_pairs = list(zip(player_ball_control, team_ball_control))
     pass_stats = pass_detector.detect(ball_control_pairs)
+    del pass_detector
+    gc.collect()
 
     # ── 12. Annotation loop (In-Place RAM Optimization) ───────────────────────
-    print("Annotating frames...")
-    import gc
+    print("Annotating frames & sweeping system memory...")
     import torch
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
