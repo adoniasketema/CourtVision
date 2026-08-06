@@ -17,6 +17,16 @@ export function UploadScreen() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [processingStep, setProcessingStep] = useState(0);
+    const [apiBase, setApiBase] = useState(() => {
+        const stored = localStorage.getItem('courtvision_api_url') || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        return stored.replace(/\/+$/, '').replace(/\/docs$/, '');
+    });
+
+    const handleApiChange = (url: string) => {
+        const cleaned = url.replace(/\/+$/, '').replace(/\/docs$/, '');
+        setApiBase(cleaned);
+        localStorage.setItem('courtvision_api_url', cleaned);
+    };
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -45,16 +55,17 @@ export function UploadScreen() {
     const startPolling = useCallback((jobId: string) => {
         setUploadStatus('processing');
         setProcessingStep(1);
+        const cleanBase = apiBase.replace(/\/+$/, '').replace(/\/docs$/, '');
 
         pollIntervalRef.current = setInterval(async () => {
             try {
-                const res = await fetch(`${API_BASE}/job/${jobId}`);
+                const res = await fetch(`${cleanBase}/job/${jobId}`);
                 if (!res.ok) throw new Error('Server error');
                 const job = await res.json();
 
                 if (job.status === 'done') {
                     clearInterval(pollIntervalRef.current!);
-                    setOutputVideoUrl(`${API_BASE}/video/${job.output_filename}`);
+                    setOutputVideoUrl(`${cleanBase}/video/${job.output_filename}`);
                     setApiStats(job.stats);
                     setUploadStatus('done');
                     setTimeout(() => setProcessingComplete(true), 400);
@@ -69,7 +80,7 @@ export function UploadScreen() {
                 setUploadStatus('error');
             }
         }, 3000);
-    }, [setUploadStatus, setUploadError, setOutputVideoUrl, setApiStats, setProcessingComplete]);
+    }, [setUploadStatus, setUploadError, setOutputVideoUrl, setApiStats, setProcessingComplete, apiBase]);
 
     const handleUpload = async () => {
         if (!selectedFile) return;
@@ -80,9 +91,10 @@ export function UploadScreen() {
 
         const formData = new FormData();
         formData.append('file', selectedFile);
+        const cleanBase = apiBase.replace(/\/+$/, '').replace(/\/docs$/, '');
 
         try {
-            const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
+            const res = await fetch(`${cleanBase}/upload`, { method: 'POST', body: formData });
             if (!res.ok) {
                 const err = await res.json();
                 throw new Error(err.detail || 'Upload failed');
@@ -128,9 +140,25 @@ export function UploadScreen() {
                                 )}
                             </div>
                             <h2 className="text-2xl font-bold mb-2">Upload Game Video</h2>
-                            <p className="text-gray-400 text-center mb-8 px-4">
+                            <p className="text-gray-400 text-center mb-6 px-4">
                                 Drag and drop your full game footage here. Our AI will automatically track players and extract stats.
                             </p>
+
+                            <div className="w-full mb-6 bg-charcoal-950/80 p-4 rounded-xl border border-charcoal-700">
+                                <label className="block text-xs font-semibold uppercase text-brand-light tracking-wider mb-2">
+                                    🌐 Cloud AI Server Endpoint (Ngrok / Local)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={apiBase}
+                                    onChange={(e) => handleApiChange(e.target.value)}
+                                    placeholder="e.g., https://abcd-12-34-56.ngrok-free.app"
+                                    className="w-full bg-charcoal-900 text-gray-200 border border-charcoal-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand transition-colors"
+                                />
+                                <span className="text-[11px] text-gray-500 mt-1 block">
+                                    Paste your live Google Colab Ngrok public link here!
+                                </span>
+                            </div>
 
                             {uploadError && (
                                 <div className="w-full bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-4 text-red-400 text-sm font-medium">
